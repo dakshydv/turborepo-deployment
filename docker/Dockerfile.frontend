@@ -1,0 +1,19 @@
+FROM node:18-alpine
+
+RUN npm install -g pnpm
+
+WORKDIR /app
+
+ARG DATABASE_URL
+COPY ./packages ./packages
+COPY ./package.json ./package.json
+COPY ./turbo.json ./turbo.json
+COPY ./apps/web ./apps/web
+
+RUN pnpm install
+RUN pnpm run db:migrate
+RUN DATABASE_URL={DATABASE_URL} pnpm run build
+
+EXPOSE 8080
+
+CMD [ "pnpm", "run", "start:web" ]
